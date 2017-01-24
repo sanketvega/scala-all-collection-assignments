@@ -1,3 +1,18 @@
+/*
+
+Q2. The Student class should contain one more field this time, gender. The values of gender must be set in a Enumeration. 
+
+Write a method getScoreCardByGender to return a tuple of ScoreCards (e.g. (List[ScoreCard], List[ScoreCard])), where first field in the tuple has male student's score card and the second field has female student's score cards.
+
+Write a method which calls the getScoreCardByGender method and gives the result which has more than 50%.
+
+Write a method to find out similar percentage between the two groups (male, female). for example Geetika -75, Kunal -75
+
+Write a method fo find out the percentage that girls group has scored but no same percentage has got in the boys group. e.g. ( Geetika -75, Neha - 73, charmy - 72) - (Kunal -75, Anmol - 73, Nitin - 71) = Charmy-72
+
+
+
+*/
 object Gender extends Enumeration{
         type Gender =Value
 	val MALE,FEMALE = Value
@@ -84,7 +99,50 @@ class StudentName(sL : List[Student], mL : List[Marks]){
                               }yield if(sL(iterator).id == thisid)sL(iterator).gen else FEMALE
               if(a.filter{ _ != FEMALE} == Vector(MALE)) true else false  
 
-        }
+        } 
+
+       def similarPercent : List[Any] = {
+		val seq = nameToPercentMapping
+		val male =   seq._1.flatten
+                val female = seq._2.flatten
+
+                
+                val b=   male map(x =>
+
+                                  (for{
+                                         iterator <- 0 to female.length-1
+                                     } yield if(female(iterator)._2 == x._2) List(female(iterator),x) else List(Nil,Nil)).toList
+
+                              )
+
+
+                   b.flatten.flatten.filter{ _ != List()}
+    }
+	
+
+	def nameToPercentMapping : (List[Map[String, Double]],List[Map[String, Double]]) ={
+
+		val scores = getScoreCardByGender
+                val malescore = scores._1
+		val femalescore = scores._2
+                (support(malescore),support(femalescore))
+	}
+
+	def support(l1 : List[ScoreCard]) : List[Map[String, Double]] ={
+
+		
+		val pair = (l1 map(x => 
+
+ 				for{
+					iterator <- 0 to sL.length-1
+				   }yield if(x.studentId == sL(iterator).id) Map(sL(iterator).name -> x.percentage) else Map("" -> 0.0))).toList
+			                     
+                     
+		pair.flatten.filter{ _ != Map("" -> 0.0)}
+		
+		}
+
+
 
 }
 
@@ -98,13 +156,13 @@ object StudentGender extends App{
   val studentList = List(Student(1,"sonu",male),Student(2,"Shubhra", female),Student(3,"bhavya", male),Student(4,"Shivangi",female),Student(5,"Ankit", male))
 
 
-  val marksList = List(Marks(1,1,95),Marks(2,1,96),Marks(3,1,98),Marks(4,1,96),Marks(5,1,96),Marks(1,2,56),Marks(2,2,10),Marks(3,2,20),Marks(4,2,0),Marks(5,2,53),Marks(1,3,56),Marks(2,3,34),Marks(3,3,45),Marks(4,3,32),Marks(5,3,92),Marks(1,4,44),Marks(2,4,23),Marks(3,4,55),Marks(4,4,77),Marks(5,4,44),Marks(1,5,43),Marks(2,5,22),Marks(3,5,54),Marks(4,5,76),Marks(5,5,45))
+  val marksList = List(Marks(1,1,95),Marks(2,1,96),Marks(3,1,98),Marks(4,1,96),Marks(5,1,96),Marks(1,2,95),Marks(2,2,96),Marks(3,2,98),Marks(4,2,96),Marks(5,2,96),Marks(1,3,56),Marks(2,3,34),Marks(3,3,45),Marks(4,3,32),Marks(5,3,92),Marks(1,4,44),Marks(2,4,23),Marks(3,4,55),Marks(4,4,77),Marks(5,4,44),Marks(1,5,43),Marks(2,5,22),Marks(3,5,54),Marks(4,5,76),Marks(5,5,45))
 
   val studentobj = new StudentName(studentList,marksList)
-  //println(searchResult)
   val list = studentobj.print50percentagePeople
-  list.foreach(println)  
-
+  list.foreach(println) 
+  println(s"\n\n=================== male-female having similar % ===============\n") 
+  println(studentobj.similarPercent)
   println("\n__________________________END________________________\n\n")
 }
 
